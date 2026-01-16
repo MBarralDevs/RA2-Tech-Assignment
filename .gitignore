@@ -1,0 +1,12 @@
+# Builds
+out/
+dist/
+
+# Private files
+.env
+
+# Cache
+cache/
+
+# Dependencies
+node_modules/
