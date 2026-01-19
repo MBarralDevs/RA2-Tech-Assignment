@@ -1,6 +1,7 @@
 # Builds
 out/
 dist/
+target/
 
 # Private files
 .env
@@ -10,3 +11,8 @@ cache/
 
 # Dependencies
 node_modules/
+
+# Rust
+backend-rust/target/
+backend-rust/Cargo.lock
+backend-rust/**/*.rs.bk
