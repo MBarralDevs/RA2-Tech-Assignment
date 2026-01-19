@@ -60,6 +60,7 @@ impl BlockchainClient {
 
     /// Fetches all Transfer events from the USDT contract in a block range
     /// Uses batching to avoid RPC limits (max 10,000 results per query)
+    /// Optimized with timestamp estimation to reduce RPC calls
     pub async fn fetch_transfer_events(
         &self,
         from_block: u64,
@@ -72,7 +73,7 @@ impl BlockchainClient {
         );
 
         // Split into chunks to avoid hitting RPC limits (10k results max)
-        const BATCH_SIZE: u64 = 500; // Fetch 500 blocks at a time
+        const BATCH_SIZE: u64 = 50; // Fetch 50 blocks at a time (USDT is extremely active!)
         
         let mut all_events = Vec::new();
         let mut current_block = from_block;
@@ -104,6 +105,14 @@ impl BlockchainClient {
 
             log::info!("Found {} Transfer events in this batch", logs.len());
 
+            // OPTIMIZATION: Get the timestamp of the first block in this batch only (one RPC call!)
+            // Then estimate timestamps for other blocks based on average block time
+            let batch_start_block = self.provider
+                .get_block(current_block)
+                .await?
+                .context("Batch start block not found")?;
+            let batch_start_timestamp = batch_start_block.timestamp.as_u64();
+
             // Convert raw logs into our TransferEvent struct
             for log in logs {
                 // Decode the event data
@@ -121,13 +130,11 @@ impl BlockchainClient {
                     .context("Log missing block number")?
                     .as_u64();
 
-                // Get the block to extract timestamp
-                let block = self.provider
-                    .get_block(block_number)
-                    .await?
-                    .context("Block not found")?;
-                
-                let timestamp = block.timestamp.as_u64();
+                // Estimate timestamp based on block difference
+                // Ethereum: ~12 seconds per block
+                // BSC: ~3 seconds per block (but we use 12 for both - it's just for bucketing)
+                let block_diff = block_number.saturating_sub(current_block);
+                let timestamp = batch_start_timestamp + (block_diff * 12);
 
                 all_events.push(TransferEvent {
                     from,
