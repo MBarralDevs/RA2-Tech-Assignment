@@ -59,9 +59,7 @@ impl BlockchainClient {
     }
 
     /// Fetches all Transfer events from the USDT contract in a block range
-    /// 
-    /// Transfer Event: Transfer(address indexed from, address indexed to, uint256 value)
-    /// Solidity event signature hash: keccak256("Transfer(address,address,uint256)")
+    /// Uses batching to avoid RPC limits (max 10,000 results per query)
     pub async fn fetch_transfer_events(
         &self,
         from_block: u64,
@@ -73,63 +71,78 @@ impl BlockchainClient {
             to_block
         );
 
-        // The Transfer event signature - this is how we filter for Transfer events
-        let transfer_event_signature = H256::from_slice(
-            &ethers::utils::keccak256("Transfer(address,address,uint256)")
-        );
-
-        // Build the filter for Transfer events from the USDT contract
-        let filter = Filter::new()
-            .address(self.usdt_address)
-            .topic0(transfer_event_signature)
-            .from_block(from_block)
-            .to_block(to_block);
-
-        // Execute the RPC call to get logs (events)
-        let logs = self.provider.get_logs(&filter).await?;
-
-        log::info!("Found {} Transfer events", logs.len());
-
-        // Convert raw logs into our TransferEvent struct
-        let mut events = Vec::new();
+        // Split into chunks to avoid hitting RPC limits (10k results max)
+        const BATCH_SIZE: u64 = 500; // Fetch 500 blocks at a time
         
-        for log in logs {
-            // Decode the event data
-            // topics[1] = from (indexed)
-            // topics[2] = to (indexed)  
-            // data = value (not indexed)
+        let mut all_events = Vec::new();
+        let mut current_block = from_block;
+
+        while current_block < to_block {
+            let batch_end = std::cmp::min(current_block + BATCH_SIZE, to_block);
             
-            if log.topics.len() < 3 {
-                continue; // Skip malformed events
+            log::info!(
+                "Fetching batch: blocks {} to {} ({} total fetched so far)",
+                current_block,
+                batch_end,
+                all_events.len()
+            );
+
+            // The Transfer event signature
+            let transfer_event_signature = H256::from_slice(
+                &ethers::utils::keccak256("Transfer(address,address,uint256)")
+            );
+
+            // Build the filter for this batch
+            let filter = Filter::new()
+                .address(self.usdt_address)
+                .topic0(transfer_event_signature)
+                .from_block(current_block)
+                .to_block(batch_end);
+
+            // Execute the RPC call
+            let logs = self.provider.get_logs(&filter).await?;
+
+            log::info!("Found {} Transfer events in this batch", logs.len());
+
+            // Convert raw logs into our TransferEvent struct
+            for log in logs {
+                // Decode the event data
+                if log.topics.len() < 3 {
+                    continue; // Skip malformed events
+                }
+
+                let from = Address::from(log.topics[1]);
+                let to = Address::from(log.topics[2]);
+                
+                // Decode the value from the data field
+                let value = U256::from_big_endian(&log.data);
+                
+                let block_number = log.block_number
+                    .context("Log missing block number")?
+                    .as_u64();
+
+                // Get the block to extract timestamp
+                let block = self.provider
+                    .get_block(block_number)
+                    .await?
+                    .context("Block not found")?;
+                
+                let timestamp = block.timestamp.as_u64();
+
+                all_events.push(TransferEvent {
+                    from,
+                    to,
+                    value,
+                    block_number,
+                    timestamp,
+                });
             }
 
-            let from = Address::from(log.topics[1]);
-            let to = Address::from(log.topics[2]);
-            
-            // Decode the value from the data field
-            let value = U256::from_big_endian(&log.data);
-            
-            let block_number = log.block_number
-                .context("Log missing block number")?
-                .as_u64();
-
-            // Get the block to extract timestamp
-            let block = self.provider
-                .get_block(block_number)
-                .await?
-                .context("Block not found")?;
-            
-            let timestamp = block.timestamp.as_u64();
-
-            events.push(TransferEvent {
-                from,
-                to,
-                value,
-                block_number,
-                timestamp,
-            });
+            current_block = batch_end;
         }
 
-        Ok(events)
+        log::info!("Total Transfer events fetched: {}", all_events.len());
+
+        Ok(all_events)
     }
 }
