@@ -116,8 +116,11 @@ pub fn process_transfer_events(events: Vec<TransferEvent>) -> TransferStats {
     let volume_chart = aggregate_volume_by_time(&events);
     let top_senders = calculate_top_senders(&events);
     
-    // Calculate total volume
-    let total_volume: U256 = events.iter().map(|e| e.value).sum();
+    // Calculate total volume manually (U256 doesn't implement Sum trait)
+      let mut total_volume = U256::zero();
+      for event in &events {
+            total_volume += event.value;
+      }
     
     TransferStats {
         volume_chart,
