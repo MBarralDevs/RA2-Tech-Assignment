@@ -1,7 +1,7 @@
 import type { Chain } from '../api/client';
 
 interface ChainSelectorProps {
-  selectedChain: Chain;
+  selectedChain: Chain | null;
   onChainChange: (chain: Chain) => void;
 }
 

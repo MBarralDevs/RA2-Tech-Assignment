@@ -14,32 +14,35 @@ import { fetchTransferStats, type Chain, type TransferStats } from './api/client
  */
 export default function App() {
   // State management
-  const [selectedChain, setSelectedChain] = useState<Chain>('ethereum');
+  const [selectedChain, setSelectedChain] = useState<Chain | null>(null);
   const [data, setData] = useState<TransferStats | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch data whenever the selected chain changes
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        console.log(`Loading data for ${selectedChain}...`);
-        const stats = await fetchTransferStats(selectedChain);
-        setData(stats);
-        console.log(`Data loaded successfully for ${selectedChain}`);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch data');
-      } finally {
-        setLoading(false);
-      }
-    }
+  // Only load if a chain is selected
+  if (!selectedChain) return;
 
-    loadData();
-  }, [selectedChain]); // Re-run when selectedChain changes
+  async function loadData() {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log(`Loading data for ${selectedChain}...`);
+      const stats = await fetchTransferStats(selectedChain as Chain);
+      setData(stats);
+      console.log(`Data loaded successfully for ${selectedChain}`);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadData();
+}, [selectedChain]);
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
@@ -81,19 +84,28 @@ export default function App() {
           </div>
         )}
 
+        {/* No chain selected state */}
+        {!selectedChain && !loading && (
+          <div className="text-center py-12 bg-white rounded-lg shadow-lg">
+            <p className="text-xl text-gray-600">
+              👆 Select a blockchain above to view USDT transfer analytics
+            </p>
+          </div>
+        )}
+
         {/* Charts - Only show when data is loaded */}
         {!loading && !error && data && (
           <div className="space-y-8">
             {/* Volume Bar Chart */}
             <VolumeChart 
               data={data.volume_chart}
-              chain={selectedChain}
+              chain={selectedChain as string}
             />
 
             {/* Top Senders Pie Chart */}
             <TopSendersChart 
               data={data.top_senders}
-              chain={selectedChain}
+              chain={selectedChain as string}
             />
 
             {/* Summary Stats */}
