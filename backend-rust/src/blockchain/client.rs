@@ -55,6 +55,19 @@ impl BlockchainClient {
             }
         }
         
+        // Debug: verify the timestamp
+        let found_block = self.provider
+            .get_block(low)
+            .await?
+            .context("Verification block not found")?;
+        
+        log::info!(
+            "Timestamp {} converted to block {} (block timestamp: {})",
+            timestamp,
+            low,
+            found_block.timestamp.as_u64()
+        );
+        
         Ok(low)
     }
 
