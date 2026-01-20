@@ -45,12 +45,12 @@ export default function App() {
 }, [selectedChain]);
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="mb-12 text-center">
           <div className="inline-block mb-4">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-xl">
+            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl shadow-xl animate-gradient animate-float">
               <h1 className="text-5xl font-bold mb-2">
                 📊 USDT Transfer Analytics
               </h1>
@@ -74,22 +74,22 @@ export default function App() {
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-20">
-            <div className="relative inline-block">
-              <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-blue-600"></div>
+          <div className="text-center py-20 animate-in fade-in duration-500">
+            <div className="relative inline-block spinner-container">
+              <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 spinner-outer border-blue-600"></div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                 <div className="animate-ping rounded-full h-12 w-12 bg-blue-400 opacity-75"></div>
               </div>
             </div>
             <div className="mt-8 space-y-3">
-              <p className="text-xl font-semibold text-gray-700">
+              <p className="text-xl font-semibold text-gray-700 animate-pulse">
                 Loading {selectedChain === 'ethereum' ? 'Ethereum' : 'BSC'} data...
               </p>
               <p className="text-gray-500">
                 Fetching blockchain events • This may take 4-5 minutes
               </p>
-              <div className="mt-4 inline-block bg-blue-50 px-6 py-3 rounded-lg">
-                <p className="text-sm text-blue-700">
+              <div className="mt-4 inline-block glass px-6 py-3 rounded-lg animate-shimmer">
+                <p className="text-sm text-blue-700 font-semibold">
                   ⏱️ Processing hundreds of thousands of on-chain transfers
                 </p>
               </div>
@@ -99,12 +99,20 @@ export default function App() {
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-8">
-            <p className="font-bold">Error</p>
-            <p>{error}</p>
-            <p className="mt-2 text-sm">
-              Make sure the backend server is running on http://localhost:8080
-            </p>
+          <div className="error-box bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300 text-red-800 px-6 py-4 rounded-xl mb-8 shadow-lg animate-in slide-in-from-top duration-500">
+            <div className="flex items-start gap-4">
+              <span className="text-3xl">⚠️</span>
+              <div className="flex-1">
+                <p className="font-bold text-lg mb-2">Error Loading Data</p>
+                <p className="text-red-700">{error}</p>
+                <div className="mt-3 p-3 bg-white rounded-lg border border-red-200">
+                  <p className="text-sm text-red-600">
+                    💡 <strong>Tip:</strong> Make sure the backend server is running on{' '}
+                    <code className="bg-red-50 px-2 py-1 rounded">http://localhost:8080</code>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -119,7 +127,7 @@ export default function App() {
 
         {/* Charts - Only show when data is loaded */}
         {!loading && !error && data && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in duration-700">
             {/* Volume Bar Chart */}
             <VolumeChart 
               data={data.volume_chart}
