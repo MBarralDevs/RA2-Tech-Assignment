@@ -21,13 +21,21 @@ export default function VolumeChart({ data, chain }: VolumeChartProps) {
   }));
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">
-        USDT Transfer Volume - {chain.toUpperCase()}
-      </h2>
-      <p className="text-gray-600 mb-6">
-        30-minute intervals on November 17, 2024 (UTC)
-      </p>
+    <div className="bg-white p-8 rounded-2xl shadow-2xl border border-gray-100 hover:shadow-3xl transition-shadow duration-300">
+      <div className="border-b border-gray-200 pb-4 mb-6">
+        <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+          <span className="text-4xl">📈</span>
+          USDT Transfer Volume
+        </h2>
+        <div className="mt-2 flex items-center gap-4">
+          <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+            {chain.toUpperCase()}
+          </span>
+          <p className="text-gray-600 text-sm">
+            30-minute intervals • November 17, 2025 (UTC)
+          </p>
+        </div>
+      </div>
       
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={chartData}>

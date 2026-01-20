@@ -48,13 +48,22 @@ export default function App() {
     <div className="min-h-screen bg-gray-100 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            USDT Transfer Analytics
-          </h1>
-          <p className="text-gray-600">
-            Analyzing on-chain USDT transfer activity on November 17, 2024
-          </p>
+        <header className="mb-12 text-center">
+          <div className="inline-block mb-4">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-xl">
+              <h1 className="text-5xl font-bold mb-2">
+                📊 USDT Transfer Analytics
+              </h1>
+              <p className="text-blue-100 text-lg">
+                Analyzing on-chain USDT transfer activity on November 17, 2025
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 text-gray-600">
+            <p className="text-sm">
+              Real-time blockchain data visualization • Powered by Rust + React
+            </p>
+          </div>
         </header>
 
         {/* Chain Selector */}
@@ -65,11 +74,26 @@ export default function App() {
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">
-              Loading {selectedChain} data... This may take 2-3 minutes on first load.
-            </p>
+          <div className="text-center py-20">
+            <div className="relative inline-block">
+              <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-blue-600"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div className="animate-ping rounded-full h-12 w-12 bg-blue-400 opacity-75"></div>
+              </div>
+            </div>
+            <div className="mt-8 space-y-3">
+              <p className="text-xl font-semibold text-gray-700">
+                Loading {selectedChain === 'ethereum' ? 'Ethereum' : 'BSC'} data...
+              </p>
+              <p className="text-gray-500">
+                Fetching blockchain events • This may take 4-5 minutes
+              </p>
+              <div className="mt-4 inline-block bg-blue-50 px-6 py-3 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  ⏱️ Processing hundreds of thousands of on-chain transfers
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -109,32 +133,54 @@ export default function App() {
             />
 
             {/* Summary Stats */}
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold mb-4">Summary</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 p-4 rounded">
-                  <p className="text-sm text-gray-600">Total Volume</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {parseFloat(data.total_volume).toLocaleString()} USDT
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200">
+              <h2 className="text-3xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+                <span className="text-4xl">📊</span>
+                Summary Statistics
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200 transform hover:scale-105 transition-transform duration-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-blue-700 uppercase tracking-wide">Total Volume</p>
+                    <span className="text-3xl">💰</span>
+                  </div>
+                  <p className="text-3xl font-bold text-blue-900">
+                    {parseFloat(data.total_volume).toLocaleString()}
                   </p>
+                  <p className="text-blue-700 font-semibold mt-1">USDT</p>
                 </div>
-                <div className="bg-green-50 p-4 rounded">
-                  <p className="text-sm text-gray-600">Time Periods</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {data.volume_chart.length} × 30min
+                
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border-2 border-green-200 transform hover:scale-105 transition-transform duration-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-green-700 uppercase tracking-wide">Time Periods</p>
+                    <span className="text-3xl">⏰</span>
+                  </div>
+                  <p className="text-3xl font-bold text-green-900">
+                    {data.volume_chart.length}
                   </p>
+                  <p className="text-green-700 font-semibold mt-1">× 30 minutes</p>
                 </div>
-                <div className="bg-purple-50 p-4 rounded">
-                  <p className="text-sm text-gray-600">Top Senders</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {data.top_senders.length} addresses
+                
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border-2 border-purple-200 transform hover:scale-105 transition-transform duration-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-purple-700 uppercase tracking-wide">Top Senders</p>
+                    <span className="text-3xl">👥</span>
+                  </div>
+                  <p className="text-3xl font-bold text-purple-900">
+                    {data.top_senders.length}
                   </p>
+                  <p className="text-purple-700 font-semibold mt-1">addresses</p>
                 </div>
               </div>
             </div>
           </div>
         )}
       </div>
+      {/* Footer */}
+        <footer className="mt-16 text-center text-gray-500 text-sm pb-8">
+          <p>Built with Rust + React • Powered by Infura RPC</p>
+          <p className="mt-2">Data source: Ethereum & BSC Mainnet</p>
+        </footer>
     </div>
   );
 }

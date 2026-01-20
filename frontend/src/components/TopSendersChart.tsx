@@ -24,13 +24,21 @@ export default function TopSendersChart({ data, chain }: TopSendersChartProps) {
   const COLORS = generateColors(chartData.length);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">
-        Top USDT Senders - {chain.toUpperCase()}
-      </h2>
-      <p className="text-gray-600 mb-6">
-        Top 90th percentile by volume
-      </p>
+    <div className="bg-white p-8 rounded-2xl shadow-2xl border border-gray-100 hover:shadow-3xl transition-shadow duration-300">
+      <div className="border-b border-gray-200 pb-4 mb-6">
+        <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+          <span className="text-4xl">🥧</span>
+          Top USDT Senders
+        </h2>
+        <div className="mt-2 flex items-center gap-4">
+          <span className="inline-block bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+            {chain.toUpperCase()}
+          </span>
+          <p className="text-gray-600 text-sm">
+            Top 90th percentile by volume
+          </p>
+        </div>
+      </div>
       
       <ResponsiveContainer width="100%" height={500}>
         <PieChart>
